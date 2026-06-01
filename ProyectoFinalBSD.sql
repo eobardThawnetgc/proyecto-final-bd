@@ -1,17 +1,17 @@
 create database Veterinaria;
 
 CREATE TABLE alergia (
-    id SERIAL PRIMARY KEY,
+    id bigint generated always as identity,
     descripcion VARCHAR(255) NOT NULL
 );
 
 CREATE TABLE especie (
-    id SERIAL PRIMARY KEY,
+    id bigint generated always as identity,
     nombre VARCHAR(100) NOT NULL UNIQUE
 );
 
 CREATE TABLE cliente (
-    id SERIAL PRIMARY KEY,
+    id bigint generated always as identity,
     nombre VARCHAR(150) NOT NULL,
     correo VARCHAR(150) UNIQUE,
     telefono VARCHAR(20),
@@ -19,12 +19,12 @@ CREATE TABLE cliente (
 );
 
 CREATE TABLE especialidad (
-    id SERIAL PRIMARY KEY,
+    id bigint generated always as identity,
     nombre VARCHAR(100) NOT NULL UNIQUE
 );
 
 CREATE TABLE veterinario (
-    id SERIAL PRIMARY KEY,
+    id bigint generated always as identity,
     nombre VARCHAR(150) NOT NULL,
     correo VARCHAR(150) UNIQUE,
     dui VARCHAR(20) UNIQUE,
@@ -37,7 +37,7 @@ CREATE TABLE veterinario (
 );
 
 CREATE TABLE mascota (
-    id SERIAL PRIMARY KEY,
+    id bigint generated always as identity,
     nombre VARCHAR(100) NOT NULL,
     peso DECIMAL(6,2),
     fecha_nacimiento DATE,
@@ -54,7 +54,7 @@ CREATE TABLE mascota (
 );
 
 CREATE TABLE alergia_mascota (
-    id SERIAL PRIMARY KEY,
+    id bigint generated always as identity,
     fk_mascota INT NOT NULL,
     fk_alergia INT NOT NULL,
 
@@ -71,7 +71,7 @@ CREATE TABLE alergia_mascota (
 );
 
 CREATE TABLE cita (
-    id SERIAL PRIMARY KEY,
+    id bigint generated always as identity,
     fecha_hora TIMESTAMP NOT NULL,
     fk_mascota INT NOT NULL,
     fk_veterinario INT NOT NULL,
@@ -86,7 +86,7 @@ CREATE TABLE cita (
 );
 
 CREATE TABLE diagnostico (
-    id SERIAL PRIMARY KEY,
+    id bigint generated always as identity,
     descripcion TEXT NOT NULL,
     observaciones TEXT,
     fk_cita INT NOT NULL UNIQUE,
@@ -97,7 +97,7 @@ CREATE TABLE diagnostico (
 );
 
 CREATE TABLE medicamento (
-    id SERIAL PRIMARY KEY,
+    id bigint generated always as identity,
     nombre VARCHAR(150) NOT NULL,
     tipo VARCHAR(100),
     contenido VARCHAR(255),
@@ -105,7 +105,7 @@ CREATE TABLE medicamento (
 );
 
 CREATE TABLE tratamiento (
-    id SERIAL PRIMARY KEY,
+    id bigint generated always as identity,
     cantidad_medicamento INT NOT NULL CHECK (cantidad_medicamento > 0),
     informacion_adicional TEXT,
     fk_diagnostico INT NOT NULL,
@@ -121,7 +121,7 @@ CREATE TABLE tratamiento (
 );
 
 CREATE TABLE procedimiento (
-    id SERIAL PRIMARY KEY,
+    id bigint generated always as identity,
     nombre VARCHAR(150) NOT NULL,
     descripcion TEXT,
     precio DECIMAL(10,2) NOT NULL CHECK (precio >= 0),
@@ -134,7 +134,7 @@ CREATE TABLE procedimiento (
 );
 
 CREATE TABLE factura (
-    id SERIAL PRIMARY KEY,
+    id bigint generated always as identity,
     total DECIMAL(10,2) NOT NULL CHECK (total >= 0),
     estado_pago VARCHAR(50) NOT NULL,
     metodo_pago VARCHAR(50) NOT NULL,
@@ -146,7 +146,7 @@ CREATE TABLE factura (
 );
 
 CREATE TABLE detalle_factura (
-    id SERIAL PRIMARY KEY,
+    id bigint generated always as identity,
     cantidad INT NOT NULL CHECK (cantidad > 0),
     precio DECIMAL(10,2) NOT NULL CHECK (precio >= 0),
     subtotal DECIMAL(10,2) NOT NULL CHECK (subtotal >= 0),
