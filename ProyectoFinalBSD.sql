@@ -1,176 +1,312 @@
 create database Veterinaria;
 
-CREATE TABLE alergia (
-    id bigint generated always as identity primary key,
-    descripcion VARCHAR(255) NOT NULL
+create table alergia (
+    id bigint generated always as identity,
+
+    descripcion varchar(255) not null,
+
+    constraint pk_alergia
+        primary key (id)
 );
 
-CREATE TABLE especie (
-    id bigint generated always as identity primary key,
-    nombre VARCHAR(100) NOT NULL UNIQUE
+create table especie (
+      id bigint generated always as identity,
+
+    nombre varchar(100) not null,
+
+    constraint pk_especie
+        primary key (id),
+
+    constraint uq_especie_nombre
+        unique (nombre)
 );
 
-CREATE TABLE cliente (
-    id bigint generated always as identity primary key,
-    nombre VARCHAR(150) NOT NULL,
-    correo VARCHAR(150) UNIQUE,
-    telefono VARCHAR(20),
-    dui VARCHAR(20) UNIQUE
+create table cliente (
+    id bigint generated always as identity,
+ nombre varchar(150) not null,
+    correo varchar(150),
+    telefono varchar(20),
+    dui varchar(20),
+
+    constraint pk_cliente
+        primary key (id),
+
+    constraint uq_cliente_correo
+        unique (correo),
+
+    constraint uq_cliente_dui
+        unique (dui)
 );
 
-CREATE TABLE especialidad (
-    id bigint generated always as identity primary key,
-    nombre VARCHAR(100) NOT NULL UNIQUE
+create table especialidad (
+     id bigint generated always as identity,
+
+    nombre varchar(100) not null,
+
+    constraint pk_especialidad
+        primary key (id),
+
+    constraint uq_especialidad_nombre
+        unique (nombre)
 );
 
-CREATE TABLE veterinario (
-    id bigint generated always as identity primary key,
-    nombre VARCHAR(150) NOT NULL,
-    correo VARCHAR(150) UNIQUE,
-    dui VARCHAR(20) UNIQUE,
-    telefono VARCHAR(20),
-    fk_especialidad INT NOT NULL,
+create table veterinario (
+   id bigint generated always as identity,
 
-    CONSTRAINT fk_veterinario_especialidad
-        FOREIGN KEY (fk_especialidad)
-        REFERENCES especialidad(id)
+    nombre varchar(150) not null,
+    correo varchar(150),
+    dui varchar(20),
+    telefono varchar(20),
+
+    fk_especialidad bigint not null,
+
+    constraint pk_veterinario
+        primary key (id),
+
+    constraint uq_veterinario_correo
+        unique (correo),
+
+    constraint uq_veterinario_dui
+        unique (dui),
+
+    constraint fk_veterinario_especialidad
+        foreign key (fk_especialidad)
+        references especialidad(id)
+        on update cascade
+        on delete restrict
 );
 
-CREATE TABLE mascota (
-    id bigint generated always as identity primary key,
-    nombre VARCHAR(100) NOT NULL,
-    peso DECIMAL(6,2),
-    fecha_nacimiento DATE,
-    fk_especie INT NOT NULL,
-    fk_propietario INT NOT NULL,
+create table mascota (
+ id bigint generated always as identity,
 
-    CONSTRAINT fk_mascota_especie
-        FOREIGN KEY (fk_especie)
-        REFERENCES especie(id),
+    nombre varchar(100) not null,
+    peso decimal(6,2),
+    fecha_nacimiento date,
 
-    CONSTRAINT fk_mascota_cliente
-        FOREIGN KEY (fk_propietario)
-        REFERENCES cliente(id)
+    fk_especie bigint not null,
+    fk_propietario bigint not null,
+
+    constraint pk_mascota
+        primary key (id),
+
+    constraint fk_mascota_especie
+        foreign key (fk_especie)
+        references especie(id)
+        on update cascade
+        on delete restrict,
+
+    constraint fk_mascota_cliente
+        foreign key (fk_propietario)
+        references cliente(id)
+        on update cascade
+        on delete restrict
 );
 
-CREATE TABLE alergia_mascota (
-    id bigint generated always as identity primary key,
-    fk_mascota INT NOT NULL,
-    fk_alergia INT NOT NULL,
+create table alergia_mascota (
+   id bigint generated always as identity,
 
-    CONSTRAINT fk_alergia_mascota_mascota
-        FOREIGN KEY (fk_mascota)
-        REFERENCES mascota(id),
+    fk_mascota bigint not null,
+    fk_alergia bigint not null,
 
-    CONSTRAINT fk_alergia_mascota_alergia
-        FOREIGN KEY (fk_alergia)
-        REFERENCES alergia(id),
+    constraint pk_alergia_mascota
+        primary key (id),
 
-    CONSTRAINT uq_alergia_mascota
-        UNIQUE (fk_mascota, fk_alergia)
+    constraint uq_alergia_mascota
+        unique (fk_mascota, fk_alergia),
+
+    constraint fk_alergia_mascota_mascota
+        foreign key (fk_mascota)
+        references mascota(id)
+        on update cascade
+        on delete restrict,
+
+    constraint fk_alergia_mascota_alergia
+        foreign key (fk_alergia)
+        references alergia(id)
+        on update cascade
+        on delete restrict
 );
 
-CREATE TABLE cita (
-    id bigint generated always as identity primary key,
-    fecha_hora TIMESTAMP NOT NULL,
-    fk_mascota INT NOT NULL,
-    fk_veterinario INT NOT NULL,
+create table cita (
+   id bigint generated always as identity,
 
-    CONSTRAINT fk_cita_mascota
-        FOREIGN KEY (fk_mascota)
-        REFERENCES mascota(id),
+    fecha_hora timestamp not null,
 
-    CONSTRAINT fk_cita_veterinario
-        FOREIGN KEY (fk_veterinario)
-        REFERENCES veterinario(id)
+    fk_mascota bigint not null,
+    fk_veterinario bigint not null,
+
+    constraint pk_cita
+        primary key (id),
+
+    constraint fk_cita_mascota
+        foreign key (fk_mascota)
+        references mascota(id)
+        on update cascade
+        on delete restrict,
+
+    constraint fk_cita_veterinario
+        foreign key (fk_veterinario)
+        references veterinario(id)
+        on update cascade
+        on delete restrict
 );
 
-CREATE TABLE diagnostico (
-    id bigint generated always as identity primary key,
-    descripcion TEXT NOT NULL,
-    observaciones TEXT,
-    fk_cita INT NOT NULL UNIQUE,
+create table diagnostico (
+    id bigint generated always as identity,
 
-    CONSTRAINT fk_diagnostico_cita
-        FOREIGN KEY (fk_cita)
-        REFERENCES cita(id)
+    descripcion text not null,
+    observaciones text,
+
+    fk_cita bigint not null,
+
+    constraint pk_diagnostico
+        primary key (id),
+
+    constraint uq_diagnostico_cita
+        unique (fk_cita),
+
+    constraint fk_diagnostico_cita
+        foreign key (fk_cita)
+        references cita(id)
+        on update cascade
+        on delete restrict
 );
 
-CREATE TABLE medicamento (
-    id bigint generated always as identity primary key,
-    nombre VARCHAR(150) NOT NULL,
-    tipo VARCHAR(100),
-    contenido VARCHAR(255),
-    precio DECIMAL(10,2) NOT NULL CHECK (precio >= 0)
+create table medicamento (
+      id bigint generated always as identity,
+
+    nombre varchar(150) not null,
+    tipo varchar(100),
+    contenido varchar(255),
+    precio decimal(10,2) not null,
+
+    constraint pk_medicamento
+        primary key (id),
+
+    constraint chk_medicamento_precio
+        check (precio >= 0)
 );
 
-CREATE TABLE tratamiento (
-    id bigint generated always as identity primary key,
-    cantidad_medicamento INT NOT NULL CHECK (cantidad_medicamento > 0),
-    informacion_adicional TEXT,
-    fk_diagnostico INT NOT NULL,
-    fk_medicamento INT NOT NULL,
+create table tratamiento (
 
-    CONSTRAINT fk_tratamiento_diagnostico
-        FOREIGN KEY (fk_diagnostico)
-        REFERENCES diagnostico(id),
+    id bigint generated always as identity,
 
-    CONSTRAINT fk_tratamiento_medicamento
-        FOREIGN KEY (fk_medicamento)
-        REFERENCES medicamento(id)
+    cantidad_medicamento int not null,
+    informacion_adicional text,
+
+    fk_diagnostico bigint not null,
+    fk_medicamento bigint not null,
+
+    constraint pk_tratamiento
+        primary key (id),
+
+    constraint chk_tratamiento_cantidad
+        check (cantidad_medicamento > 0),
+
+    constraint fk_tratamiento_diagnostico
+        foreign key (fk_diagnostico)
+        references diagnostico(id)
+        on update cascade
+        on delete restrict,
+
+    constraint fk_tratamiento_medicamento
+        foreign key (fk_medicamento)
+        references medicamento(id)
+        on update cascade
+        on delete restrict
+
 );
 
-CREATE TABLE procedimiento (
-    id bigint generated always as identity primary key,
-    nombre VARCHAR(150) NOT NULL,
-    descripcion TEXT,
-    precio DECIMAL(10,2) NOT NULL CHECK (precio >= 0),
-    estado VARCHAR(50),
-    fk_diagnostico INT NOT NULL,
+create table procedimiento (
+    id bigint generated always as identity,
 
-    CONSTRAINT fk_procedimiento_diagnostico
-        FOREIGN KEY (fk_diagnostico)
-        REFERENCES diagnostico(id)
+    nombre varchar(150) not null,
+    descripcion text,
+    precio decimal(10,2) not null,
+    estado varchar(50),
+
+    fk_diagnostico bigint not null,
+
+    constraint pk_procedimiento
+        primary key (id),
+
+    constraint chk_procedimiento_precio
+        check (precio >= 0),
+
+    constraint fk_procedimiento_diagnostico
+        foreign key (fk_diagnostico)
+        references diagnostico(id)
+        on update cascade
+        on delete restrict
 );
 
-CREATE TABLE factura (
-    id bigint generated always as identity primary key,
-    total DECIMAL(10,2) NOT NULL CHECK (total >= 0),
-    estado_pago VARCHAR(50) NOT NULL,
-    metodo_pago VARCHAR(50) NOT NULL,
-    fk_cliente INT NOT NULL,
+create table factura (
+    id bigint generated always as identity,
 
-    CONSTRAINT fk_factura_cliente
-        FOREIGN KEY (fk_cliente)
-        REFERENCES cliente(id)
+    total decimal(10,2) not null,
+    estado_pago varchar(50) not null,
+    metodo_pago varchar(50) not null,
+
+    fk_cliente bigint not null,
+
+    constraint pk_factura
+        primary key (id),
+
+    constraint chk_factura_total
+        check (total >= 0),
+
+    constraint fk_factura_cliente
+        foreign key (fk_cliente)
+        references cliente(id)
+        on update cascade
+        on delete restrict
 );
 
-CREATE TABLE detalle_factura (
-    id bigint generated always as identity primary key,
-    cantidad INT NOT NULL CHECK (cantidad > 0),
-    precio DECIMAL(10,2) NOT NULL CHECK (precio >= 0),
-    subtotal DECIMAL(10,2) NOT NULL CHECK (subtotal >= 0),
+create table detalle_factura (
+    id bigint generated always as identity,
 
-    fk_medicamento INT,
-    fk_procedimiento INT,
-    fk_factura INT NOT NULL,
+    cantidad int not null,
+    precio decimal(10,2) not null,
+    subtotal decimal(10,2) not null,
 
-    CONSTRAINT fk_detalle_medicamento
-        FOREIGN KEY (fk_medicamento)
-        REFERENCES medicamento(id),
+    fk_medicamento bigint,
+    fk_procedimiento bigint,
+    fk_factura bigint not null,
 
-    CONSTRAINT fk_detalle_procedimiento
-        FOREIGN KEY (fk_procedimiento)
-        REFERENCES procedimiento(id),
+    constraint pk_detalle_factura
+        primary key (id),
 
-    CONSTRAINT fk_detalle_factura
-        FOREIGN KEY (fk_factura)
-        REFERENCES factura(id),
+    constraint chk_detalle_cantidad
+        check (cantidad > 0),
 
-    CONSTRAINT chk_detalle_item
-        CHECK (
-            (fk_medicamento IS NOT NULL AND fk_procedimiento IS NULL)
-            OR
-            (fk_medicamento IS NULL AND fk_procedimiento IS NOT NULL)
+    constraint chk_detalle_precio
+        check (precio >= 0),
+
+    constraint chk_detalle_subtotal
+        check (subtotal >= 0),
+
+    constraint fk_detalle_medicamento
+        foreign key (fk_medicamento)
+        references medicamento(id)
+        on update cascade
+        on delete restrict,
+
+    constraint fk_detalle_procedimiento
+        foreign key (fk_procedimiento)
+        references procedimiento(id)
+        on update cascade
+        on delete restrict,
+
+    constraint fk_detalle_factura
+        foreign key (fk_factura)
+        references factura(id)
+        on update cascade
+        on delete restrict,
+
+    constraint chk_detalle_item
+        check (
+            (fk_medicamento is not null and fk_procedimiento is null)
+            or
+            (fk_medicamento is null and fk_procedimiento is not null)
         )
 );
