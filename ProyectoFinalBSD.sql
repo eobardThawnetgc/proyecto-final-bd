@@ -18,7 +18,22 @@ create table especie (
         primary key (id),
 
     constraint uq_especie_nombre
-        unique (nombre)
+        unique (nombre),
+        constraint chk_especie_nombre
+    check (
+        nombre in (
+            'perro',
+            'gato',
+            'conejo',
+            'hamster',
+            'loro',
+            'canario',
+            'tortuga',
+            'iguana',
+            'serpiente',
+            'pez'
+        )
+    ) 
 );
 
 create table cliente (
@@ -47,7 +62,22 @@ create table especialidad (
         primary key (id),
 
     constraint uq_especialidad_nombre
-        unique (nombre)
+        unique (nombre),
+        constraint chk_especialidad_nombre
+    check (
+        nombre in (
+            'medicina general',
+            'cirugia',
+            'dermatologia',
+            'odontologia',
+            'oftalmologia',
+            'cardiologia',
+            'traumatologia',
+            'neurologia',
+            'oncologia',
+            'animales exoticos'
+        )
+    )
 );
 
 create table veterinario (
@@ -232,6 +262,31 @@ create table procedimiento (
 
     constraint chk_procedimiento_precio
         check (precio >= 0),
+        constraint chk_procedimiento_nombre
+    check (
+        nombre in (
+            'consulta general',
+            'vacunacion',
+            'desparasitacion',
+            'radiografia',
+            'ultrasonido',
+            'cirugia',
+            'limpieza dental',
+            'hospitalizacion',
+            'curacion',
+            'esterilizacion'
+        )
+    ),
+
+constraint chk_procedimiento_estado
+    check (
+        estado in (
+            'pendiente',
+            'en proceso',
+            'finalizado',
+            'cancelado'
+        )
+    ),
 
     constraint fk_procedimiento_diagnostico
         foreign key (fk_diagnostico)
@@ -254,6 +309,7 @@ create table factura (
 
     constraint chk_factura_total
         check (total >= 0),
+        
 
     constraint fk_factura_cliente
         foreign key (fk_cliente)
