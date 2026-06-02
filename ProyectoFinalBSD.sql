@@ -1,5 +1,3 @@
-create database Veterinaria;
-
 create table alergia (
     id bigint generated always as identity,
 
@@ -153,6 +151,31 @@ create table alergia_mascota (
     constraint fk_alergia_mascota_alergia
         foreign key (fk_alergia)
         references alergia(id)
+        on update cascade
+        on delete restrict
+);
+
+create table alergia_mascota_medicamento (
+    id bigint generated always as identity,
+
+    fk_mascota bigint not null,
+    fk_medicamento bigint not null,
+
+    constraint pk_alergia_medicamento
+        primary key (id),
+
+    constraint uq_alergia_medicamento
+        unique (fk_mascota, fk_medicamento),
+
+    constraint fk_alergia_medicamento_mascota
+        foreign key (fk_mascota)
+        references mascota(id)
+        on update cascade
+        on delete restrict,
+
+    constraint fk_alergia_medicamento_medicamento
+        foreign key (fk_medicamento)
+        references medicamento(id)
         on update cascade
         on delete restrict
 );
