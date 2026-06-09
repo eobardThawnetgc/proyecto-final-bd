@@ -110,12 +110,16 @@ create table mascota (
     nombre varchar(100) not null,
     peso decimal(6,2),
     fecha_nacimiento date,
+    sexo varchar(20) not null,
 
     fk_especie bigint not null,
     fk_propietario bigint not null,
 
     constraint pk_mascota
         primary key (id),
+    
+    constraint chk_mascota_sexo
+    check (sexo in ('macho', 'hembra')),
 
     constraint fk_mascota_especie
         foreign key (fk_especie)
@@ -155,6 +159,21 @@ create table alergia_mascota (
         on delete restrict
 );
 
+create table medicamento (
+      id bigint generated always as identity,
+
+    nombre varchar(150) not null,
+    tipo varchar(100),
+    contenido varchar(255),
+    precio decimal(10,2) not null,
+
+    constraint pk_medicamento
+        primary key (id),
+
+    constraint chk_medicamento_precio
+        check (precio >= 0)
+);
+
 create table alergia_mascota_medicamento (
     id bigint generated always as identity,
 
@@ -178,6 +197,31 @@ create table alergia_mascota_medicamento (
         references medicamento(id)
         on update cascade
         on delete restrict
+);
+
+create table vacuna (
+    id bigint generated always as identity,
+    nombre varchar(100) not null,
+    descripcion text,
+
+    primary key(id)
+);
+
+create table vacunacion_mascota (
+    id bigint generated always as identity,
+
+    fk_mascota bigint not null,
+    fk_vacuna bigint not null,
+
+    fecha_aplicacion date not null,
+    fecha_proxima_dosis date,
+    observaciones text,
+
+    primary key(id),
+
+    foreign key (fk_mascota) references mascota(id),
+
+    foreign key (fk_vacuna) references vacuna(id)
 );
 
 create table cita (
@@ -223,21 +267,6 @@ create table diagnostico (
         references cita(id)
         on update cascade
         on delete restrict
-);
-
-create table medicamento (
-      id bigint generated always as identity,
-
-    nombre varchar(150) not null,
-    tipo varchar(100),
-    contenido varchar(255),
-    precio decimal(10,2) not null,
-
-    constraint pk_medicamento
-        primary key (id),
-
-    constraint chk_medicamento_precio
-        check (precio >= 0)
 );
 
 create table tratamiento (
