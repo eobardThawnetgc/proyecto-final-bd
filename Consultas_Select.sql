@@ -40,6 +40,16 @@ GROUP BY med.id, med.nombre
 ORDER BY veces_recetado DESC;
 
 -- ======================================
+--Ingresos totales (Citas) por especialidad veterinaria (Reportes Gerenciales)
+SELECT esp.nombre AS especialidad,
+       COUNT(c.id) AS visitas_totales
+FROM especialidad esp
+JOIN veterinario v ON esp.id = v.fk_especialidad
+JOIN cita c ON v.id = c.fk_veterinario
+GROUP BY esp.nombre
+ORDER BY visitas_totales DESC;
+
+-- ======================================
 --Propietarios con mascotas rezagadas (Gestion del paciente)
 SELECT 
     cl.id AS id_cliente,
