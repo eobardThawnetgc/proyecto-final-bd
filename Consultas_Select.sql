@@ -3,7 +3,7 @@
 -- ======================================
 
 -- ======================================
---Mascotas mas atendidas por mes
+--Mascotas mas atendidas por mes (Reportes Generales)
 SELECT 
     EXTRACT(YEAR FROM c.fecha_hora) AS anio,
     EXTRACT(MONTH FROM c.fecha_hora) AS mes,
@@ -16,20 +16,20 @@ GROUP BY EXTRACT(YEAR FROM c.fecha_hora), EXTRACT(MONTH FROM c.fecha_hora), m.id
 ORDER BY anio DESC, mes DESC, total_atenciones DESC;
 
 -- ======================================
---Veterinario con mayor numero de citas en el trimestre
+--Veterinario con mayor numero de citas en el trimestre (Reportes Gerenciales)
 SELECT 
     v.id AS id_veterinario,
     v.nombre AS nombre_veterinario,
     COUNT(c.id) AS total_citas
 FROM cita c
 JOIN veterinario v ON c.fk_veterinario = v.id
-WHERE c.fecha_hora BETWEEN '2025-01-01' AND '2025-03-31' --Pongamos por ejemplo que empieze desde enero 2025
+WHERE c.fecha_hora BETWEEN '2025-01-01' AND '2025-03-31'
 GROUP BY v.id, v.nombre
 ORDER BY total_citas DESC
 LIMIT 1;
 
 -- ======================================
---Medicamentos preescritos con mayor frecuencia
+--Medicamentos preescritos con mayor frecuencia (Reportes Gerenciales)
 SELECT 
     med.id AS id_medicamento,
     med.nombre AS medicamento,
@@ -40,17 +40,7 @@ GROUP BY med.id, med.nombre
 ORDER BY veces_recetado DESC;
 
 -- ======================================
---Ingresos totales (Citas) por especialidad veterinaria
-SELECT esp.nombre AS especialidad,
-       COUNT(c.id) AS visitas_totales
-FROM especialidad esp
-JOIN veterinario v ON esp.id = v.fk_especialidad
-JOIN cita c ON v.id = c.fk_veterinario
-GROUP BY esp.nombre
-ORDER BY visitas_totales DESC;
-
--- ======================================
---Propietarios con que no han asistido a citas en los últimos 6 meses.
+--Propietarios con mascotas rezagadas (Gestion del paciente)
 SELECT 
     cl.id AS id_cliente,
     cl.nombre AS cliente,
@@ -65,7 +55,7 @@ WHERE NOT EXISTS (
 );
 
 -- ======================================
---Ficha tecnica y datos generales del paciente (mascota)
+--Ficha tecnica y datos generales del paciente (mascota) (Gestion del paciente)
 SELECT 
     m.nombre AS nombre_mascota,
     EXTRACT(YEAR FROM AGE(CURRENT_DATE, m.fecha_nacimiento)) AS edad_anos,
@@ -78,7 +68,7 @@ JOIN cliente cl ON m.fk_cliente = cl.id
 WHERE m.id = :id_mascota; -- Sustituir por el ID de la mascota a consultar
 
 -- ======================================
---Antecedentes de alergias
+--Antecedentes de alergias (Gestion del paciente)
 SELECT 
     med.nombre AS medicamento_prohibido,
     al.descripcion AS tipo_alergia
@@ -88,7 +78,7 @@ JOIN alergia al ON amm.fk_medicamento = al.id
 WHERE amm.fk_mascota = :id_mascota; -- Sustituir por el ID de la mascota a consultar
 
 -- ======================================
---Historial de enfermedades y diagnosticos pasados
+--Historial de enfermedades y diagnosticos pasados (Gestion del paciente)
 SELECT 
     c.fecha_hora AS fecha_visita,
     d.descripcion AS diagnostico_emitido,
@@ -100,7 +90,7 @@ WHERE c.fk_mascota = :id_mascota -- Sustituir por el ID de la mascota a consulta
 ORDER BY c.fecha_hora DESC;
 
 -- ======================================
---Registro de cirugias o intervenciones pasadas
+--Registro de cirugias o intervenciones pasadas (Gestion del paciente)
 SELECT 
     c.fecha_hora AS fecha_procedimiento,
     p.nombre AS procedimiento_realizado,
@@ -108,32 +98,32 @@ SELECT
 FROM procedimiento p
 JOIN diagnostico d ON p.fk_diagnostico = d.id
 JOIN cita c ON d.fk_cita = c.id
-WHERE c.fk_mascota = :id_mascota
-ORDER BY c.fecha_hora DESC;
-
--- ======================================
---Motivo de consulta y revision por sistemas (de consultas anteriores)
-SELECT 
-    c.fecha_hora AS fecha_visita,
-    d.observaciones AS historial_clinico -- Aquí se lee el resumen de la entrevista, síntomas y revisión que se han hecho
-FROM cita c
-JOIN diagnostico d ON d.fk_cita = c.id 
 WHERE c.fk_mascota = :id_mascota -- Sustituir por el ID de la mascota a consultar
 ORDER BY c.fecha_hora DESC;
 
 -- ======================================
---Control de vacunacion y desparacitaciones
+--Motivo de consulta y revision por sistemas (de consultas anteriores) (Gestion del paciente)
+SELECT 
+    c.fecha_hora AS fecha_visita,
+    d.observaciones AS historial_clinico -- Aquí se lee el resumen de la entrevista, síntomas y revisión
+FROM cita c
+JOIN diagnostico d ON d.fk_cita = c.id
+WHERE c.fk_mascota = :id_mascota -- Sustituir por el ID de la mascota a consultar
+ORDER BY c.fecha_hora DESC;
+
+-- ======================================
+--Control de vacunacion y desparacitaciones (Gestion del paciente)
 SELECT 
     v.nombre AS vacuna_o_antiparasitario,
     vm.fecha_aplicacion AS fecha_administracion,
     v.descripcion AS detalles
 FROM vacunacion_mascota vm
 JOIN vacuna v ON vm.fk_vacuna = v.id
-WHERE vm.fk_mascota = :id_mascota
+WHERE vm.fk_mascota = :id_mascota -- Sustituir por el ID de la mascota a consultar
 ORDER BY vm.fecha_aplicacion DESC;
 
 -- ======================================
---Reporte de top 5 enfermedades mas comunes por especie
+--Reporte de top 5 enfermedades mas comunes por especie (Reporte Gerenciales)
 SELECT 
     e.nombre AS especie,
     d.descripcion AS enfermedad_diagnostico,
@@ -145,3 +135,5 @@ JOIN especie e ON m.fk_especie = e.id
 GROUP BY e.nombre, d.descripcion
 ORDER BY total_casos DESC
 LIMIT 5;
+
+-- ======================================
