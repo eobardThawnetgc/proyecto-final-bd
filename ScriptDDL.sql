@@ -1,4 +1,4 @@
--- almacena los tipos de alergias que pueden presentar las mascotas 
+-- Almacena los tipos de alergias que pueden presentar las mascotas 
 create table alergia (
     id bigint generated always as identity,
     descripcion varchar(255) not null,
@@ -6,7 +6,7 @@ create table alergia (
         primary key (id)
 );
 
--- almacena las especies de animales registradas en la veterinaria
+-- Almacena las especies de animales registradas en la veterinaria
 create table especie (
     id bigint generated always as identity,
     nombre varchar(100) not null,
@@ -31,7 +31,7 @@ create table especie (
     ) 
 );
 
--- almacena la información de los propietarios de las mascotas
+-- Almacena la información de los propietarios de las mascotas
 create table cliente (
     id bigint generated always as identity,
  	nombre varchar(150) not null,
@@ -46,7 +46,7 @@ create table cliente (
         unique (dui)
 );
 
--- almacena las especialidades médicas de los veterinarios
+-- Almacena las especialidades médicas de los veterinarios
 create table especialidad (
      id bigint generated always as identity,
     nombre varchar(100) not null,
@@ -71,7 +71,7 @@ create table especialidad (
     )
 );
 
--- almacena la información de los veterinarios y su especialidad
+-- Almacena la información de los veterinarios y su especialidad
 create table veterinario (
     id bigint generated always as identity,
     nombre varchar(150) not null,
@@ -92,7 +92,7 @@ create table veterinario (
         on delete restrict
 );
 
--- almacena la información de las mascotas registradas en la clínica
+-- Almacena la información de las mascotas registradas en la clínica
 create table mascota (
  	id bigint generated always as identity,
     nombre varchar(100) not null,
@@ -117,7 +117,7 @@ create table mascota (
         on delete restrict
 );
 
--- relaciona las mascotas con las alergias que padecen
+-- Relaciona las mascotas con las alergias que padecen
 create table alergia_mascota (
     id bigint generated always as identity,
     fk_mascota bigint not null,
@@ -138,7 +138,7 @@ create table alergia_mascota (
         on delete restrict
 );
 
--- almacena los medicamentos utilizados en tratamientos veterinarios
+-- Almacena los medicamentos utilizados en tratamientos veterinarios
 create table medicamento (
     id bigint generated always as identity,
     nombre varchar(150) not null,
@@ -151,7 +151,7 @@ create table medicamento (
         check (precio >= 0)
 );
 
--- relaciona mascotas con medicamentos a los que pueden presentar alergia
+-- Relaciona mascotas con medicamentos a los que pueden presentar alergia
 create table alergia_mascota_medicamento (
     id bigint generated always as identity,
     fk_mascota bigint not null,
@@ -172,7 +172,7 @@ create table alergia_mascota_medicamento (
         on delete restrict
 );
 
--- almacena las vacunas disponibles para aplicación en mascotas
+-- Almacena las vacunas disponibles para aplicación en mascotas
 create table vacuna (
     id bigint generated always as identity,
     nombre varchar(100) not null,
@@ -181,7 +181,7 @@ create table vacuna (
     	primary key(id)
 );
 
--- registra el historial de vacunación de cada mascota
+-- Registra el historial de vacunación de cada mascota
 create table vacunacion_mascota (
     id bigint generated always as identity,
     fk_mascota bigint not null,
@@ -199,7 +199,7 @@ create table vacunacion_mascota (
     	references vacuna(id)
 );
 
--- registra las citas médicas entre mascotas y veterinarios
+-- Registra las citas médicas entre mascotas y veterinarios
 create table cita (
     id bigint generated always as identity,
     fecha_hora timestamp not null,
@@ -219,7 +219,7 @@ create table cita (
         on delete restrict
 );
 
--- almacena los diagnósticos generados durante una cita veterinaria
+-- Almacena los diagnósticos generados durante una cita veterinaria
 create table diagnostico (
     id bigint generated always as identity,
     descripcion text not null,
@@ -236,7 +236,7 @@ create table diagnostico (
         on delete restrict
 );
 
--- registra los tratamientos y medicamentos indicados en un diagnóstico
+-- Registra los tratamientos y medicamentos indicados en un diagnóstico
 create table tratamiento (
     id bigint generated always as identity,
     cantidad_medicamento int not null,
@@ -259,7 +259,7 @@ create table tratamiento (
         on delete restrict
 );
 
--- almacena los procedimientos médicos realizados a las mascotas
+-- Almacena los procedimientos médicos realizados a las mascotas
 create table procedimiento (
     id bigint generated always as identity,
     nombre varchar(150) not null,
@@ -302,7 +302,7 @@ constraint chk_procedimiento_estado
         on delete restrict
 );
 
--- registra la facturación de los servicios prestados a los clientes
+-- Registra la facturación de los servicios prestados a los clientes
 create table factura (
     id bigint generated always as identity,
     total decimal(10,2) not null,
@@ -320,7 +320,7 @@ create table factura (
         on delete restrict
 );
 
--- almacena el detalle de medicamentos y procedimientos incluidos en una factura
+-- Almacena el detalle de medicamentos y procedimientos incluidos en una factura
 create table detalle_factura ( 
     id bigint generated always as identity,
     cantidad int not null,
