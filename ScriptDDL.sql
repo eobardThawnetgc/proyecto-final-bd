@@ -247,6 +247,10 @@ create table tratamiento (
         primary key (id),
     constraint chk_tratamiento_cantidad
         check (cantidad_medicamento > 0),
+
+    constraint uq_tratamiento_diagnostico_medicamento
+        unique (fk_diagnostico, fk_medicamento),
+
     constraint fk_tratamiento_diagnostico
         foreign key (fk_diagnostico)
         references diagnostico(id)
