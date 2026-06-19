@@ -192,8 +192,12 @@ create table vacuna (
     id bigint generated always as identity,
     nombre varchar(100) not null,
     descripcion text,
-    constraint pk_vacuna 
-    	primary key(id)
+
+    constraint pk_vacuna
+        primary key (id),
+
+    constraint uq_vacuna_nombre
+        unique (nombre)
 );
 
 -- Registra el historial de vacunación de cada mascota
@@ -213,6 +217,12 @@ create table vacunacion_mascota (
             fk_mascota,
             fk_vacuna,
             fecha_aplicacion
+        ),
+
+        constraint chk_fechas_vacunacion
+        check (
+            fecha_proxima_dosis is null
+            or fecha_proxima_dosis > fecha_aplicacion
         ),
 
     constraint fk_vacunacion_mascota
