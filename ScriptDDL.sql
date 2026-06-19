@@ -189,14 +189,24 @@ create table vacunacion_mascota (
     fecha_aplicacion date not null,
     fecha_proxima_dosis date,
     observaciones text,
-    constraint pk_vacunacion_mascota 
-    	primary key(id),
-    constraint fk_vacunacion_mascota 
-    	foreign key (fk_mascota) 
-    	references mascota(id),
-    constraint fk_mascota_mascota 
-    	foreign key (fk_vacuna) 
-    	references vacuna(id)
+
+    constraint pk_vacunacion_mascota
+        primary key(id),
+
+    constraint uq_vacunacion_mascota
+        unique (
+            fk_mascota,
+            fk_vacuna,
+            fecha_aplicacion
+        ),
+
+    constraint fk_vacunacion_mascota
+        foreign key (fk_mascota)
+        references mascota(id),
+
+    constraint fk_mascota_mascota
+        foreign key (fk_vacuna)
+        references vacuna(id)
 );
 
 -- Registra las citas médicas entre mascotas y veterinarios
@@ -327,35 +337,51 @@ create table factura (
 -- Almacena el detalle de medicamentos y procedimientos incluidos en una factura
 create table detalle_factura ( 
     id bigint generated always as identity,
+
     cantidad int not null,
     precio decimal(10,2) not null,
     subtotal decimal(10,2) not null,
+
     fk_medicamento bigint,
     fk_procedimiento bigint,
     fk_factura bigint not null,
+
     constraint pk_detalle_factura
         primary key (id),
+
     constraint chk_detalle_cantidad
         check (cantidad > 0),
+
     constraint chk_detalle_precio
         check (precio >= 0),
+
     constraint chk_detalle_subtotal
         check (subtotal >= 0),
+
+    constraint uq_detalle_factura_medicamento
+        unique (fk_factura, fk_medicamento),
+
+    constraint uq_detalle_factura_procedimiento
+        unique (fk_factura, fk_procedimiento),
+
     constraint fk_detalle_medicamento
         foreign key (fk_medicamento)
         references medicamento(id)
         on update cascade
         on delete restrict,
+
     constraint fk_detalle_procedimiento
         foreign key (fk_procedimiento)
         references procedimiento(id)
         on update cascade
         on delete restrict,
+
     constraint fk_detalle_factura
         foreign key (fk_factura)
         references factura(id)
         on update cascade
         on delete restrict,
+
     constraint chk_detalle_item
         check (
             (fk_medicamento is not null and fk_procedimiento is null)

@@ -1,37 +1,59 @@
 --FUNCIONES
 
---Obtener mascotas pertenecientes a un cliente 
 create or replace function fn_obtener_mascotas_cliente(id_cliente bigint)
 returns table (
-	id bigint, 
+	id bigint,
 	nombre varchar(100),
-	sexo varchar(20)
+	sexo varchar(20),
+	especie varchar(100)
 )
 language plpgsql
 as $$
-	begin	
-		return query
-		select mascota.id, mascota.nombre, mascota.sexo from mascota where fk_propietario = id_cliente;
-	end;
+begin
+	return query
+	select
+		m.id,
+		m.nombre,
+		m.sexo,
+		e.nombre
+	from mascota m
+	inner join especie e
+		on m.fk_especie = e.id
+	where m.fk_propietario = id_cliente;
+end;
 $$;
 
 select * from fn_obtener_mascotas_cliente(2);
 
---calcular edad de una mascota
-create or replace function fn_calcular_edad_mascota(id_mascota bigint)
-returns integer
+--Obtener información de una mascota 
+create or replace function fn_informacion_mascota(id_cliente bigint)
+returns table (
+	id bigint,
+	nombre varchar(100),
+	sexo varchar(20),
+	especie varchar(100),
+	propietario varchar(100)
+)
 language plpgsql
 as $$
-	declare edad integer;
-	begin
-		select extract(year from age(current_date, fecha_nacimiento)) into edad
-		from mascota
-		where id = id_mascota;
-	return edad;
-	end;
+begin
+	return query
+	select
+		m.id,
+		m.nombre,
+		m.sexo,
+		e.nombre,
+		c.nombre
+	from mascota m
+	inner join especie e
+		on m.fk_especie = e.id
+	inner join cliente c
+		on m.fk_propietario = c.id
+	where m.fk_propietario = id_cliente;
+end;
 $$;
 
-select fn_calcular_edad_mascota(57) as edad_mascota;
+select * from fn_informacion_mascota(2);
 
 --calcular el total de citas de una mascota
 create or replace function fn_total_citas_mascota(id_mascota bigint)
@@ -118,12 +140,15 @@ $$;
 select * from fn_obtener_vacunas_mascota(58);
 
 --generar el historial clínico de una mascota
+drop function if exists fn_historial_clinico_mascota(bigint);
+
 create or replace function fn_historial_clinico_mascota(
     p_id_mascota bigint
 )
 returns table(
     fecha_cita timestamp,
-    diagnostico text,
+    veterinario varchar(100),
+    descripcion_diagnostico text,
     medicamento varchar(150),
     cantidad_medicamento integer,
     procedimiento varchar(150)
@@ -135,11 +160,14 @@ begin
     return query
     select
         c.fecha_hora,
+        v.nombre,
         d.descripcion,
         m.nombre,
         t.cantidad_medicamento,
         p.nombre
     from cita c
+    inner join veterinario v
+        on v.id = c.fk_veterinario
     inner join diagnostico d
         on d.fk_cita = c.id
     left join tratamiento t
@@ -384,7 +412,8 @@ call sp_generar_detalle_factura(
 
 
 --TRIGGERS
---creación de función 
+
+--creación de función para verificar si la mascota es alérgica al medicamento recetado
 create or replace function fn_verificar_alergia_tratamiento()
 returns trigger
 language plpgsql
@@ -440,5 +469,176 @@ values
 );
 
 
+--creación de función para validar disponibilidad de mascota o veterinario al registrar o actualizar cita
+create or replace function fn_validar_disponibilidad_cita()
+returns trigger
+language plpgsql
+as $$
+begin
+
+    -- verificar que la mascota no tenga otra cita a la misma hora
+    if exists (
+        select 1
+        from cita
+        where fk_mascota = new.fk_mascota
+        and fecha_hora = new.fecha_hora
+        and id <> coalesce(new.id, -1)
+    ) then
+        raise exception
+        'La mascota ya tiene una cita programada para esa fecha y hora';
+    end if;
+
+    -- verificar que el veterinario no tenga otra cita a la misma hora
+    if exists (
+        select 1
+        from cita
+        where fk_veterinario = new.fk_veterinario
+        and fecha_hora = new.fecha_hora
+        and id <> coalesce(new.id, -1)
+    ) then
+        raise exception
+        'El veterinario ya tiene una cita programada para esa fecha y hora';
+    end if;
+
+    return new;
+
+end;
+$$;
+
+create or replace trigger trg_validar_disponibilidad_cita
+before insert or update
+on cita
+for each row
+execute function fn_validar_disponibilidad_cita();
+
+insert into cita(
+    fk_mascota,
+    fk_veterinario,
+    fecha_hora
+)
+values(
+    1,
+    2,
+    '2026-07-20 09:00:00'
+);
 
 
+-- Verifica que no se facture un procedimiento cancelado
+create or replace function fn_validar_procedimiento_facturable()
+returns trigger
+language plpgsql
+as $$
+declare
+    v_estado varchar(50);
+begin
+
+    -- Solo validar cuando se facture un procedimiento
+    if new.fk_procedimiento is not null then
+
+        select estado
+        into v_estado
+        from procedimiento
+        where id = new.fk_procedimiento;
+
+        if v_estado = 'cancelado' then
+            raise exception
+            'No se puede facturar un procedimiento cancelado';
+        end if;
+
+    end if;
+
+    return new;
+
+end;
+$$;
+
+create or replace trigger trg_validar_procedimiento_facturable
+before insert or update
+on detalle_factura
+for each row
+execute function fn_validar_procedimiento_facturable();
+
+update procedimiento
+set estado = 'cancelado'
+where id = 1;
+
+insert into detalle_factura(
+    cantidad,
+    precio,
+    subtotal,
+    fk_procedimiento,
+    fk_factura
+)
+values(
+    1,
+    25.00,
+    25.00,
+    1,
+    1
+);
+
+
+-- Actualiza automáticamente el total de una factura
+create or replace function fn_actualizar_total_factura()
+returns trigger
+language plpgsql
+as $$
+declare
+    v_factura bigint;
+begin
+
+    v_factura := coalesce(
+        new.fk_factura,
+        old.fk_factura
+    );
+
+    update factura
+    set total = (
+        select coalesce(sum(subtotal), 0)
+        from detalle_factura
+        where fk_factura = v_factura
+    )
+    where id = v_factura;
+
+    return null;
+
+end;
+$$;
+
+create or replace trigger trg_actualizar_total_factura
+after insert or update or delete
+on detalle_factura
+for each row
+execute function fn_actualizar_total_factura();
+
+insert into detalle_factura(
+    cantidad,
+    precio,
+    subtotal,
+    fk_medicamento,
+    fk_factura
+)
+values(
+    2,
+    10.00,
+    20.00,
+    1,
+    1
+);
+
+update detalle_factura
+set subtotal = 50.00
+where id = (
+    select max(id)
+    from detalle_factura
+);
+
+delete from detalle_factura
+where id = (
+    select max(id)
+    from detalle_factura
+);
+
+select total
+from factura
+where id = 1;
