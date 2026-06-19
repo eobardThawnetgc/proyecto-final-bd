@@ -642,3 +642,45 @@ where id = (
 select total
 from factura
 where id = 1;
+
+
+--evitar ingreso de fechas futuras en fecha de nacimiento de una mascota
+create or replace function fn_validar_fecha_nacimiento_mascota()
+returns trigger
+language plpgsql
+as $$
+begin
+
+    if new.fecha_nacimiento > current_date then
+        raise exception
+        'La fecha de nacimiento no puede ser mayor a la fecha actual.';
+    end if;
+
+    return new;
+
+end;
+$$;
+
+create trigger trg_validar_fecha_nacimiento_mascota
+before insert or update
+on mascota
+for each row
+execute function fn_validar_fecha_nacimiento_mascota();
+
+insert into mascota (
+    nombre,
+    peso,
+    fecha_nacimiento,
+    sexo,
+    fk_especie,
+    fk_propietario
+)
+values (
+    'Firulais',
+    10.5,
+    '2030-01-01',
+    'macho',
+    1,
+    1
+);
+

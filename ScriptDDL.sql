@@ -94,22 +94,32 @@ create table veterinario (
 
 -- Almacena la información de las mascotas registradas en la clínica
 create table mascota (
- 	id bigint generated always as identity,
+    id bigint generated always as identity,
     nombre varchar(100) not null,
     peso decimal(6,2),
     fecha_nacimiento date,
     sexo varchar(20) not null,
     fk_especie bigint not null,
     fk_propietario bigint not null,
+
     constraint pk_mascota
-        primary key (id),   
+        primary key (id),
+
+    constraint chk_mascota_peso
+        check (peso > 0),
+
     constraint chk_mascota_sexo
-    check (sexo in ('macho', 'hembra')),
+        check (sexo in ('macho', 'hembra')),
+
+    constraint uq_mascota_nombre_propietario
+    unique(nombre, fk_propietario),
+
     constraint fk_mascota_especie
         foreign key (fk_especie)
         references especie(id)
         on update cascade
         on delete restrict,
+
     constraint fk_mascota_cliente
         foreign key (fk_propietario)
         references cliente(id)
@@ -145,10 +155,15 @@ create table medicamento (
     tipo varchar(100),
     contenido varchar(255),
     precio decimal(10,2) not null,
+
     constraint pk_medicamento
         primary key (id),
+
     constraint chk_medicamento_precio
-        check (precio >= 0)
+        check (precio >= 0),
+
+    constraint uq_medicamento_nombre_contenido
+        unique (nombre, contenido)
 );
 
 -- Relaciona mascotas con medicamentos a los que pueden presentar alergia
