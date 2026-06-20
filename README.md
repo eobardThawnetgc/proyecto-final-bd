@@ -1,6 +1,20 @@
-# 🐾 Sistema de Gestión Clínica Veterinaria
+## 📚 Asignatura
 
-Proyecto Final de Bases de Datos desarrollado en PostgreSQL.
+**Bases de Datos**
+
+Universidad Centroamericana José Simeón Cañas (UCA)
+
+**Proyecto Final – Sistema de Gestión Clínica Veterinaria**
+
+---
+
+## 👥 Integrantes
+
+* Juan Manuel Flores Crisóstomo, 00135025
+* Diego Alejandro González García, 00072825
+* Jorge Alberto Escobar Menjivar, 00072325
+* Sofía Nicole Rodríguez Campos, 00175525
+---
 
 ## 📖 Descripción
 
@@ -56,7 +70,6 @@ El desarrollo fue realizado siguiendo el ciclo completo de diseño de bases de d
 * PostgreSQL 17
 * PL/pgSQL
 * DBeaver
-* Docker
 
 ---
 
@@ -92,21 +105,4 @@ La base de datos implementa:
 * Automatización mediante Procedimientos Almacenados
 
 ---
-
-## 👥 Integrantes
-
-* Nombre Integrante 1
-* Nombre Integrante 2
-* Nombre Integrante 3
-* Nombre Integrante 4
-* Nombre Integrante 5
-
----
-
-## 📚 Asignatura
-
-**Bases de Datos**
-
-Universidad Centroamericana José Simeón Cañas (UCA)
-
-**Proyecto Final – Sistema de Gestión Clínica Veterinaria**
+Este proyecto permitió aplicar los conceptos fundamentales de diseño, implementación y programación de bases de datos relacionales en PostgreSQL mediante el desarrollo de un sistema de gestión para una clínica veterinaria.
